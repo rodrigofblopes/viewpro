@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1086,4 +1087,1094 @@
         setInterval(syncMobileMenuButtons, 500);
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador 3D - ConectaPro</title>
+    <!-- Three.js Core + Loaders -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #eaf1fb 0%, #f3f8fd 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #222;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.7);
+            padding: 1rem 2rem;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-active {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .btn-active:hover {
+            background: #059669;
+        }
+
+        .container {
+            height: calc(100vh - 80px);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-area {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .upload-box {
+            border: 3px dashed rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .upload-box:hover {
+            border-color: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .upload-box.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .upload-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .upload-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .format-tags {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .format-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 1rem;
+            background: #eaf1fb;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            max-width: 300px;
+        }
+
+        .new-file-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 150;
+        }
+
+        .status-indicator {
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-loading {
+            background: rgba(59, 130, 246, 0.9);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.9);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .controls-3d {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        #viewer-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .projeto-info {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .projeto-info h3 {
+            margin-bottom: 0.5rem;
+            color: #c4b5fd;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 1100;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 4px;
+            margin: 4px 0;
+            background: white;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 80vw;
+            max-width: 320px;
+            height: 100vh;
+            background: rgba(30, 30, 50, 0.98);
+            box-shadow: -2px 0 20px rgba(0,0,0,0.3);
+            z-index: 2000;
+            flex-direction: column;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            gap: 1.2rem;
+            animation: slideInMenu 0.3s;
+        }
+        .mobile-menu.active {
+            display: flex;
+        }
+        .mobile-menu .btn {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 1rem 0;
+            margin-bottom: 0.5rem;
+        }
+        .mobile-menu .close-btn {
+            align-self: flex-end;
+            font-size: 2rem;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        @keyframes slideInMenu {
+            from { right: -100vw; opacity: 0; }
+            to { right: 0; opacity: 1; }
+        }
+        @media (max-width: 700px) {
+            .controls {
+                display: none !important;
+            }
+            .hamburger {
+                display: flex;
+            }
+        }
+        .mobile-3d-tip {
+            @media (max-width: 700px) {
+                .controls-3d {
+                    display: none !important;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">
+            <span class="logo">🏗️</span>
+            ConectaPro - Visualizador 3D
+        </div>
+        <div class="controls">
+            <div class="status-indicator" id="status">
+                ⏳ Carregando sistema...
+            </div>
+            <button class="btn" onclick="resetCamera()" id="resetBtn" disabled>↻ Reset</button>
+            <button class="btn" onclick="toggleWireframe()" id="wireBtn" disabled>◊ Wireframe</button>
+            <button class="btn btn-active" onclick="toggleGrid()" id="gridBtn" disabled>⚏ Grid</button>
+            <button class="btn" onclick="autoRotate()" id="rotateBtn" disabled>🔄 Auto-rotação</button>
+            <a href="biblioteca.html" class="btn">📚 Biblioteca</a>
+        </div>
+        <div class="hamburger" id="hamburgerMenu" tabindex="0" aria-label="Abrir menu mobile">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-btn" id="closeMobileMenu" aria-label="Fechar menu">&times;</button>
+        <button class="btn" onclick="resetCamera();closeMobileMenu()" id="resetBtnMobile" disabled>↻ Resetar Câmera</button>
+        <button class="btn" onclick="toggleWireframe();closeMobileMenu()" id="wireBtnMobile" disabled>◊ Wireframe</button>
+        <button class="btn btn-active" onclick="toggleGrid();closeMobileMenu()" id="gridBtnMobile" disabled>⚏ Grid</button>
+        <button class="btn" onclick="autoRotate();closeMobileMenu()" id="rotateBtnMobile" disabled>🔄 Auto-rotação</button>
+        <a href="biblioteca.html" class="btn">📚 Biblioteca</a>
+        <a href="3d.html" class="btn">🧊 Visualizador</a>
+    </div>
+
+    <div class="container">
+        <div class="upload-area" id="uploadArea">
+            <div id="projetoInfo" class="projeto-info" style="display: none;">
+                <h3 id="projetoTitulo">Projeto da Biblioteca</h3>
+                <p id="projetoDetalhes">Carregando informações...</p>
+            </div>
+
+            <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📦</div>
+                <div class="upload-title">Carregue seu Modelo 3D</div>
+                <div class="upload-subtitle">Clique aqui ou arraste arquivos .glb ou .gltf</div>
+                
+                <div class="format-tags">
+                    <span class="format-tag">.glb</span>
+                    <span class="format-tag">.gltf</span>
+                    <span class="format-tag">Revit → Blender → GLB</span>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <strong>❌ Erro no carregamento</strong>
+                <p id="errorText"></p>
+            </div>
+        </div>
+
+        <div class="canvas-container" id="canvasContainer" style="display: none;">
+            <canvas id="viewer-canvas"></canvas>
+            
+            <div class="new-file-btn">
+                <button class="btn btn-primary" onclick="loadNewFile()">
+                    📁 Novo Modelo
+                </button>
+            </div>
+            
+            <div class="info-panel" id="infoPanel">
+                <div><strong>Carregando informações...</strong></div>
+            </div>
+
+            <div class="controls-3d">
+                <div><strong>Controles 3D:</strong></div>
+                <div>• Rotação: Clique + arraste</div>
+                <div>• Zoom: Scroll</div>
+                <div>• Pan: Clique direito + arraste</div>
+                <div>• Reset: Botão ↻ acima</div>
+                <div>• Grid: Botão ⚏ para ocultar/mostrar</div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <div id="loadingText">Carregando modelo 3D...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <small id="loadingProgress">Preparando...</small>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept=".glb,.gltf" onchange="handleFileUpload(event)">
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        let scene, camera, renderer, controls, mixer;
+        let currentModel = null;
+        let gridHelper = null;
+        let axesHelper = null;
+        let isWireframe = false;
+        let isGridVisible = true;
+        let autoRotationEnabled = false;
+        let projetoAtual = null;
+
+        // Variáveis globais para acesso via onclick
+        window.resetCamera = resetCamera;
+        window.toggleWireframe = toggleWireframe;
+        window.toggleGrid = toggleGrid;
+        window.autoRotate = autoRotate;
+        window.loadNewFile = loadNewFile;
+        window.handleFileUpload = handleFileUpload;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏗️ ConectaPro Visualizador 3D iniciado');
+            init3D();
+            setupDragAndDrop();
+            checkURLParams();
+        });
+
+        function checkURLParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projetoId = urlParams.get('projetoId');
+            const nome = urlParams.get('nome');
+            const autor = urlParams.get('autor');
+            const url = urlParams.get('url');
+
+            if (projetoId && url) {
+                console.log('📦 Carregando projeto da biblioteca:', nome);
+                
+                projetoAtual = {
+                    id: projetoId,
+                    nome: nome,
+                    autor: autor,
+                    url: url
+                };
+
+                // Mostrar informações do projeto
+                mostrarInfoProjeto();
+                
+                // Carregar automaticamente
+                setTimeout(() => {
+                    loadModelFromURL(url, nome);
+                }, 1000);
+            }
+        }
+
+        function mostrarInfoProjeto() {
+            if (projetoAtual) {
+                const projetoInfo = document.getElementById('projetoInfo');
+                const projetoTitulo = document.getElementById('projetoTitulo');
+                const projetoDetalhes = document.getElementById('projetoDetalhes');
+
+                projetoTitulo.textContent = `🏗️ ${projetoAtual.nome}`;
+                projetoDetalhes.innerHTML = `
+                    ${projetoAtual.autor ? `<strong>👤 Autor:</strong> ${projetoAtual.autor}<br>` : ''}
+                    <strong>📦 Fonte:</strong> Biblioteca ConectaPro<br>
+                    <small>🔄 Carregando automaticamente...</small>
+                `;
+                
+                projetoInfo.style.display = 'block';
+            }
+        }
+
+        function init3D() {
+            try {
+                // Cena
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xeaf1fb);
+                scene.fog = new THREE.Fog(0xeaf1fb, 100, 1000);
+
+                // Câmera
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(5, 5, 5);
+
+                // Canvas
+                const canvas = document.getElementById('viewer-canvas');
+                
+                // Renderer
+                renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    antialias: true,
+                    alpha: true
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight - 80);
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.outputColorSpace = THREE.SRGBColorSpace;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1;
+
+                // Controles
+                controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.minDistance = 1;
+                controls.maxDistance = 100;
+                controls.autoRotate = false;
+                controls.autoRotateSpeed = 2.0;
+
+                // Iluminação
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                scene.add(directionalLight);
+
+                const pointLight1 = new THREE.PointLight(0xffffff, 0.5);
+                pointLight1.position.set(-10, 10, 10);
+                scene.add(pointLight1);
+
+                const pointLight2 = new THREE.PointLight(0xffffff, 0.3);
+                pointLight2.position.set(10, -10, -10);
+                scene.add(pointLight2);
+
+                // Grade de referência
+                gridHelper = new THREE.GridHelper(20, 20, 0x666666, 0x444444);
+                scene.add(gridHelper);
+
+                // Eixos de referência
+                axesHelper = new THREE.AxesHelper(5);
+                scene.add(axesHelper);
+
+                // Redimensionamento
+                window.addEventListener('resize', onWindowResize);
+
+                // Iniciar loop de renderização
+                animate();
+
+                // Atualizar status
+                updateStatus('✅ Sistema Online', 'success');
+                enableControls(false);
+
+                console.log('✅ Cena 3D inicializada com sucesso');
+
+            } catch (error) {
+                console.error('❌ Erro ao inicializar 3D:', error);
+                updateStatus('❌ Erro no sistema', 'error');
+            }
+        }
+
+        function setupDragAndDrop() {
+            const uploadBox = document.getElementById('uploadBox');
+            const container = document.querySelector('.container');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                container.addEventListener(eventName, preventDefaults, false);
+                uploadBox.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadBox.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadBox.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadBox.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                uploadBox.classList.remove('dragover');
+            }
+
+            container.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    handleFiles(files);
+                }
+            }
+        }
+
+        function handleFiles(files) {
+            const file = files[0];
+            if (file && (file.name.endsWith('.glb') || file.name.endsWith('.gltf'))) {
+                loadModel(file);
+            } else {
+                showError('Por favor, selecione um arquivo .glb ou .gltf válido');
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Resetar projeto atual se carregando arquivo local
+                projetoAtual = null;
+                document.getElementById('projetoInfo').style.display = 'none';
+                loadModel(file);
+            }
+        }
+
+        function loadModelFromURL(url, nome) {
+            console.log('🌐 Carregando modelo da URL:', url);
+            
+            // Mostrar loading
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            updateStatus('📦 Carregando da biblioteca...', 'loading');
+            updateLoadingProgress(0, 'Baixando arquivo...');
+
+            const loader = new GLTFLoader();
+
+            loader.load(
+                url,
+                (gltf) => {
+                    try {
+                        console.log('✅ Modelo da biblioteca carregado:', gltf);
+                        processLoadedModel(gltf, { name: nome, size: 0 }, true);
+                    } catch (error) {
+                        console.error('❌ Erro ao processar modelo da biblioteca:', error);
+                        showError('Erro ao processar o modelo 3D da biblioteca: ' + error.message);
+                    }
+                },
+                (progress) => {
+                    if (progress.lengthComputable) {
+                        const percent = (progress.loaded / progress.total) * 100;
+                        updateLoadingProgress(percent, `Baixando: ${percent.toFixed(0)}%`);
+                    } else {
+                        updateLoadingProgress(50, 'Baixando arquivo...');
+                    }
+                },
+                (error) => {
+                    console.error('❌ Erro ao carregar modelo da biblioteca:', error);
+                    showError('Erro ao carregar o modelo 3D da biblioteca. O arquivo pode estar corrompido ou inacessível.');
+                }
+            );
+        }
+
+        function loadModel(file) {
+            // Mostrar loading
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            updateStatus('📦 Carregando modelo...', 'loading');
+            updateLoadingProgress(0, 'Preparando arquivo...');
+
+            const url = URL.createObjectURL(file);
+            const loader = new GLTFLoader();
+
+            loader.load(
+                url,
+                (gltf) => {
+                    try {
+                        console.log('✅ Modelo local carregado:', gltf);
+                        processLoadedModel(gltf, file, false);
+                        URL.revokeObjectURL(url);
+                    } catch (error) {
+                        console.error('❌ Erro ao processar modelo local:', error);
+                        showError('Erro ao processar o modelo 3D: ' + error.message);
+                        URL.revokeObjectURL(url);
+                    }
+                },
+                (progress) => {
+                    if (progress.lengthComputable) {
+                        const percent = (progress.loaded / progress.total) * 100;
+                        updateLoadingProgress(percent, `Carregando: ${percent.toFixed(0)}%`);
+                    }
+                },
+                (error) => {
+                    console.error('❌ Erro ao carregar modelo local:', error);
+                    showError('Erro ao carregar o modelo 3D. Verifique se o arquivo está correto.');
+                    URL.revokeObjectURL(url);
+                }
+            );
+        }
+
+        function processLoadedModel(gltf, fileInfo, isFromLibrary) {
+            // Remover modelo anterior
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            // Adicionar novo modelo
+            currentModel = gltf.scene;
+            scene.add(currentModel);
+
+            // Configurar animações
+            if (gltf.animations && gltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(currentModel);
+                gltf.animations.forEach((clip) => {
+                    const action = mixer.clipAction(clip);
+                    action.play();
+                });
+            }
+
+            // Calcular bounding box
+            const box = new THREE.Box3().setFromObject(currentModel);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            console.log('📐 Dimensões originais:', size);
+            console.log('📍 Centro original:', center);
+            
+            // FORÇAR centralização - mover para origem absoluta
+            currentModel.position.set(-center.x, -center.y, -center.z);
+            
+            // Auto-escala inteligente
+            const maxDim = Math.max(size.x, size.y, size.z);
+            let targetScale = 1;
+            
+            if (maxDim < 5) {
+                targetScale = 10; // Modelo muito pequeno
+            } else if (maxDim > 50) {
+                targetScale = 20 / maxDim; // Modelo muito grande
+            }
+            
+            if (targetScale !== 1) {
+                currentModel.scale.multiplyScalar(targetScale);
+                console.log('🔍 Escala aplicada:', targetScale);
+            }
+            
+            // Recalcular após transformações
+            const finalBox = new THREE.Box3().setFromObject(currentModel);
+            const finalSize = finalBox.getSize(new THREE.Vector3());
+            const finalMaxDim = Math.max(finalSize.x, finalSize.y, finalSize.z);
+            
+            // Posicionar câmera otimizada
+            const distance = Math.max(15, finalMaxDim * 1.5);
+            camera.position.set(distance * 0.7, distance * 0.7, distance * 0.7);
+            controls.target.set(0, 0, 0);
+            controls.update();
+            
+            console.log('✅ Modelo centralizado e otimizado');
+
+            // Mostrar canvas
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('canvasContainer').style.display = 'block';
+            
+            // Atualizar informações
+            updateModelInfo(fileInfo, gltf, isFromLibrary);
+            updateStatus('✅ Modelo carregado!', 'success');
+            enableControls(true);
+        }
+
+        function updateModelInfo(fileInfo, gltf, isFromLibrary) {
+            const scene = gltf.scene;
+            let vertices = 0;
+            let faces = 0;
+            let materials = 0;
+
+            scene.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.geometry) {
+                        vertices += child.geometry.attributes.position ? child.geometry.attributes.position.count : 0;
+                        faces += child.geometry.index ? child.geometry.index.count / 3 : vertices / 3;
+                    }
+                    if (child.material) {
+                        materials++;
+                    }
+                }
+            });
+
+            let infoHTML = '';
+            
+            if (isFromLibrary && projetoAtual) {
+                infoHTML = `
+                    <div><strong>📦 Projeto:</strong> ${projetoAtual.nome}</div>
+                    ${projetoAtual.autor ? `<div><strong>👤 Autor:</strong> ${projetoAtual.autor}</div>` : ''}
+                    <div><strong>📚 Fonte:</strong> Biblioteca ConectaPro</div>
+                    <hr style="margin: 0.5rem 0; border-color: rgba(255,255,255,0.2);">
+                `;
+            } else {
+                infoHTML = `
+                    <div><strong>📁 Arquivo:</strong> ${fileInfo.name}</div>
+                    <div><strong>📏 Tamanho:</strong> ${(fileInfo.size / 1024 / 1024).toFixed(1)} MB</div>
+                    <div><strong>🎯 Formato:</strong> ${fileInfo.name.split('.').pop().toUpperCase()}</div>
+                    <hr style="margin: 0.5rem 0; border-color: rgba(255,255,255,0.2);">
+                `;
+            }
+
+            infoHTML += `
+                <div><strong>🔺 Vértices:</strong> ${vertices.toLocaleString()}</div>
+                <div><strong>🔷 Faces:</strong> ${faces.toLocaleString()}</div>
+                <div><strong>🎨 Materiais:</strong> ${materials}</div>
+                <div><strong>🎬 Animações:</strong> ${gltf.animations ? gltf.animations.length : 0}</div>
+                <div><strong>✅ Status:</strong> Carregado</div>
+            `;
+
+            document.getElementById('infoPanel').innerHTML = infoHTML;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (mixer) {
+                mixer.update(0.016);
+            }
+            
+            if (controls) {
+                controls.update();
+            }
+            
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function resetCamera() {
+            if (controls) {
+                controls.reset();
+                showNotification('Câmera resetada!');
+            }
+        }
+
+        function toggleWireframe() {
+            isWireframe = !isWireframe;
+            if (currentModel) {
+                currentModel.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => mat.wireframe = isWireframe);
+                        } else {
+                            child.material.wireframe = isWireframe;
+                        }
+                    }
+                });
+                
+                // Atualizar visual do botão
+                const wireBtn = document.getElementById('wireBtn');
+                if (isWireframe) {
+                    wireBtn.classList.add('btn-active');
+                } else {
+                    wireBtn.classList.remove('btn-active');
+                }
+                
+                showNotification(isWireframe ? 'Wireframe ativado' : 'Wireframe desativado');
+            }
+        }
+
+        function toggleGrid() {
+            isGridVisible = !isGridVisible;
+            
+            if (gridHelper) {
+                gridHelper.visible = isGridVisible;
+            }
+            
+            if (axesHelper) {
+                axesHelper.visible = isGridVisible;
+            }
+            
+            // Atualizar visual do botão
+            const gridBtn = document.getElementById('gridBtn');
+            if (isGridVisible) {
+                gridBtn.classList.add('btn-active');
+                gridBtn.innerHTML = '⚏ Grid';
+            } else {
+                gridBtn.classList.remove('btn-active');
+                gridBtn.innerHTML = '⚏ Grid';
+            }
+            
+            showNotification(isGridVisible ? 'Grid ativo' : 'Grid oculto');
+        }
+
+        function autoRotate() {
+            autoRotationEnabled = !autoRotationEnabled;
+            if (controls) {
+                controls.autoRotate = autoRotationEnabled;
+                
+                // Atualizar visual do botão
+                const rotateBtn = document.getElementById('rotateBtn');
+                if (autoRotationEnabled) {
+                    rotateBtn.classList.add('btn-active');
+                } else {
+                    rotateBtn.classList.remove('btn-active');
+                }
+                
+                showNotification(autoRotationEnabled ? 'Auto-rotação ativada' : 'Auto-rotação desativada');
+            }
+        }
+
+        function loadNewFile() {
+            // Limpar parâmetros da URL e resetar projeto atual
+            window.history.replaceState({}, document.title, window.location.pathname);
+            projetoAtual = null;
+            document.getElementById('projetoInfo').style.display = 'none';
+            
+            // Mostrar área de upload
+            document.getElementById('canvasContainer').style.display = 'none';
+            document.getElementById('uploadArea').style.display = 'block';
+            
+            // Reset status
+            updateStatus('✅ Sistema Online', 'success');
+            enableControls(false);
+            
+            // Abrir seletor de arquivo
+            document.getElementById('fileInput').click();
+        }
+
+        function onWindowResize() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / (window.innerHeight - 80);
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight - 80);
+            }
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status-indicator';
+            if (type === 'loading') status.classList.add('status-loading');
+            if (type === 'error') status.classList.add('status-error');
+        }
+
+        function updateLoadingProgress(percent, text) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('loadingProgress').textContent = text;
+        }
+
+        function enableControls(enabled) {
+            document.getElementById('resetBtn').disabled = !enabled;
+            document.getElementById('wireBtn').disabled = !enabled;
+            document.getElementById('gridBtn').disabled = !enabled;
+            document.getElementById('rotateBtn').disabled = !enabled;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('uploadArea').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorText').textContent = message;
+            updateStatus('❌ Erro no carregamento', 'error');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: rgba(59, 130, 246, 0.9);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                z-index: 1000;
+                backdrop-filter: blur(10px);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // CSS para animações
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Menu mobile
+        const hamburger = document.getElementById('hamburgerMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenuBtn = document.getElementById('closeMobileMenu');
+        hamburger.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+        closeMobileMenuBtn.addEventListener('click', closeMobileMenu);
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+        }
+        // Fechar menu ao clicar fora
+        window.addEventListener('click', function(e) {
+            if (mobileMenu.classList.contains('active') && !mobileMenu.contains(e.target) && e.target !== hamburger) {
+                closeMobileMenu();
+            }
+        });
+        // Sincronizar estado dos botões mobile com desktop
+        function syncMobileMenuButtons() {
+            document.getElementById('resetBtnMobile').disabled = document.getElementById('resetBtn').disabled;
+            document.getElementById('wireBtnMobile').disabled = document.getElementById('wireBtn').disabled;
+            document.getElementById('gridBtnMobile').disabled = document.getElementById('gridBtn').disabled;
+            document.getElementById('rotateBtnMobile').disabled = document.getElementById('rotateBtn').disabled;
+        }
+        setInterval(syncMobileMenuButtons, 500);
+    </script>
+</body>
+>>>>>>> d2ba42b (Primeiro commit do projeto ViewPro 3D)
 </html>

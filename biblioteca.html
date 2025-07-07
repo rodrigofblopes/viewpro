@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -733,4 +734,741 @@
         window.visualizarProjeto = visualizarProjeto;
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConectaPro - Biblioteca de Projetos 3D</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.7);
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 2rem;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-home {
+            background: #6b7280;
+            border-color: #6b7280;
+        }
+
+        .btn-upload {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .stats-badge {
+            background: rgba(139, 92, 246, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .biblioteca-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .biblioteca-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffffff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .biblioteca-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .search-filters {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .filter-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .filter-button:hover,
+        .filter-button.active {
+            background: rgba(139, 92, 246, 0.8);
+            border-color: rgba(139, 92, 246, 0.8);
+        }
+
+        .projetos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .projeto-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .projeto-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .projeto-card:hover::before {
+            left: 100%;
+        }
+
+        .projeto-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+
+        .projeto-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: #8b5cf6;
+        }
+
+        .projeto-card h4 {
+            margin: 0 0 0.8rem 0;
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .projeto-card p {
+            margin: 0 0 1rem 0;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .projeto-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+        }
+
+        .projeto-autor {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.2rem;
+        }
+
+        .autor-nome {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .autor-instagram {
+            color: #ec4899;
+            font-weight: 600;
+        }
+
+        .projeto-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.2rem;
+            opacity: 0.7;
+        }
+
+        .projeto-visualizar {
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+
+        .projeto-visualizar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .empty-library {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.7;
+            grid-column: 1 / -1;
+        }
+
+        .empty-library-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            color: #8b5cf6;
+        }
+
+        .empty-library h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #8b5cf6;
+        }
+
+        .empty-library p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(139, 92, 246, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .categoria-tag {
+            background: rgba(139, 92, 246, 0.3);
+            color: #c4b5fd;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .biblioteca-title {
+                font-size: 2rem;
+            }
+            
+            .biblioteca-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .projetos-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .search-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                min-width: auto;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .projeto-card {
+                padding: 1rem;
+            }
+            
+            .projeto-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">
+            <span class="logo">📚</span>
+            Biblioteca de Projetos 3D
+        </div>
+        <div class="header-controls">
+            <div class="stats-badge" id="totalProjetos">
+                📊 Carregando...
+            </div>
+            <a href="index.html" class="btn btn-home">⬅️ Voltar</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="biblioteca-header">
+            <h1 class="biblioteca-title">Biblioteca de Projetos</h1>
+            <p class="biblioteca-subtitle">
+                Explore modelos 3D aprovados da comunidade ConectaPro. 
+                Projetos verificados de arquitetos, engenheiros e designers profissionais.
+            </p>
+        </div>
+
+        <div class="search-filters">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar projetos por nome, autor ou descrição...">
+            <button class="filter-button active" onclick="filtrarPor('todos')" id="filtroTodos">Todos</button>
+            <button class="filter-button" onclick="filtrarPor('recentes')" id="filtroRecentes">Recentes</button>
+            <button class="filter-button" onclick="filtrarPor('populares')" id="filtroPopulares">Populares</button>
+            <button class="filter-button" onclick="filtrarPor('categoria')" id="filtroCategoria">Por Categoria</button>
+        </div>
+
+        <div class="projetos-grid" id="projetosGrid">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Importar Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Configurações do Supabase (mesmas do upload3d.html)
+        const SUPABASE_URL = 'https://yugcnpbadwmnqmixlsdc.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1Z2NucGJhZHdtbnFtaXhsc2RjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTUxNDAsImV4cCI6MjA2NjE5MTE0MH0.UY0bEcYUzy4n0De2DJmQWcHAYigs_drTq17uIo2LxZg';
+        const TABLE_NAME = 'projetos_3d';
+
+        let supabaseClient = null;
+        let bibliotecaPublica = [];
+        let projetosFiltrados = [];
+        let filtroAtivo = 'todos';
+        let termoBusca = '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSupabase();
+            carregarBibliotecaPublica();
+            setupBusca();
+            
+            // Atualizar automaticamente a cada 30 segundos
+            setInterval(carregarBibliotecaPublica, 30000);
+        });
+
+        function initializeSupabase() {
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase inicializado com sucesso na biblioteca');
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao inicializar Supabase:', error);
+                showNotification('Erro ao conectar com o banco de dados', 'error');
+                return false;
+            }
+        }
+
+        function setupBusca() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                termoBusca = e.target.value.toLowerCase();
+                aplicarFiltros();
+            });
+        }
+
+        function filtrarPor(tipo) {
+            filtroAtivo = tipo;
+            
+            // Atualizar botões ativos
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const botaoTipo = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            const botao = document.getElementById(`filtro${botaoTipo}`);
+            if (botao) {
+                botao.classList.add('active');
+            }
+            
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
+            let projetos = [...bibliotecaPublica];
+            
+            // Aplicar busca por texto
+            if (termoBusca) {
+                projetos = projetos.filter(projeto => 
+                    projeto.nome.toLowerCase().includes(termoBusca) ||
+                    (projeto.autor && projeto.autor.toLowerCase().includes(termoBusca)) ||
+                    (projeto.descricao && projeto.descricao.toLowerCase().includes(termoBusca)) ||
+                    (projeto.instagram && projeto.instagram.toLowerCase().includes(termoBusca)) ||
+                    (projeto.categoria && projeto.categoria.toLowerCase().includes(termoBusca))
+                );
+            }
+            
+            // Aplicar filtro por categoria
+            switch (filtroAtivo) {
+                case 'recentes':
+                    projetos.sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
+                    break;
+                case 'populares':
+                    projetos.sort((a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0));
+                    break;
+                case 'categoria':
+                    projetos = projetos.filter(projeto => projeto.categoria && projeto.categoria.trim() !== '');
+                    projetos.sort((a, b) => a.categoria.localeCompare(b.categoria));
+                    break;
+                default:
+                    // 'todos' - manter ordem por data de criação
+                    projetos.sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
+                    break;
+            }
+            
+            projetosFiltrados = projetos;
+            renderizarProjetos();
+        }
+
+        function renderizarProjetos() {
+            const grid = document.getElementById('projetosGrid');
+            
+            if (!grid) return;
+
+            if (projetosFiltrados.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-library">
+                        <div class="empty-library-icon">📚</div>
+                        <h3>Nenhum projeto encontrado</h3>
+                        <p>${termoBusca ? 'Nenhum projeto corresponde à sua busca.' : 'Nenhum projeto foi aprovado ainda pelo administrador.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            projetosFiltrados.forEach(projeto => {
+                const dataFormatada = new Date(projeto.data_criacao).toLocaleDateString('pt-BR');
+                const tamanhoMB = (projeto.tamanho / (1024 * 1024)).toFixed(2);
+                
+                // Mapear extensão para ícone
+                const extensao = projeto.arquivo_nome.split('.').pop().toLowerCase();
+                const iconeExtensao = {
+                    'glb': '🎲',
+                    'gltf': '🎯',
+                    'obj': '🏗️',
+                    'fbx': '📦'
+                }[extensao] || '📁';
+                
+                html += `
+                    <div class="projeto-card" onclick="visualizarProjeto('${projeto.id}')">
+                        <span class="projeto-icon">${iconeExtensao}</span>
+                        <h4>${projeto.nome}</h4>
+                        <p>${projeto.descricao || 'Projeto 3D disponível para visualização'}</p>
+                        
+                        ${projeto.categoria ? `<div class="categoria-tag">${projeto.categoria}</div>` : ''}
+                        
+                        <div class="projeto-meta">
+                            <div class="projeto-autor">
+                                ${projeto.autor ? `<div class="autor-nome">👤 ${projeto.autor}</div>` : ''}
+                                ${projeto.instagram ? `<div class="autor-instagram">📸 @${projeto.instagram}</div>` : ''}
+                            </div>
+                            <div class="projeto-stats">
+                                <div>📁 ${tamanhoMB} MB</div>
+                                <div>📅 ${dataFormatada}</div>
+                                <div>👁️ ${projeto.visualizacoes || 0} views</div>
+                            </div>
+                        </div>
+                        
+                        <button class="projeto-visualizar" onclick="event.stopPropagation(); visualizarProjeto('${projeto.id}')">
+                            🎯 Visualizar em 3D
+                        </button>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        async function visualizarProjeto(projetoId) {
+            const projeto = bibliotecaPublica.find(p => p.id === projetoId);
+            
+            if (!projeto) {
+                showNotification('Projeto não encontrado!', 'error');
+                return;
+            }
+
+            try {
+                // Atualizar contador de visualizações no Supabase
+                const novasVisualizacoes = (projeto.visualizacoes || 0) + 1;
+                
+                const { error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .update({ visualizacoes: novasVisualizacoes })
+                    .eq('id', projetoId);
+
+                if (error) {
+                    console.error('Erro ao atualizar visualizações:', error);
+                }
+
+                // Atualizar localmente
+                projeto.visualizacoes = novasVisualizacoes;
+                renderizarProjetos();
+                
+            } catch (error) {
+                console.error('Erro ao registrar visualização:', error);
+            }
+            
+            showNotification(`Abrindo projeto "${projeto.nome}"...`, 'info');
+            
+            // Redirecionar para o visualizador 3D com parâmetros do projeto
+            const params = new URLSearchParams({
+                projetoId: projeto.id,
+                nome: projeto.nome,
+                autor: projeto.autor || '',
+                url: projeto.arquivo_url
+            });
+            
+            window.location.href = `3d.html?${params.toString()}`;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            if (type === 'error') {
+                notification.style.background = 'rgba(239, 68, 68, 0.9)';
+            } else if (type === 'success') {
+                notification.style.background = 'rgba(16, 185, 129, 0.9)';
+            } else if (type === 'warning') {
+                notification.style.background = 'rgba(245, 158, 11, 0.9)';
+            } else {
+                notification.style.background = 'rgba(139, 92, 246, 0.9)';
+            }
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 4000);
+        }
+
+        async function carregarBibliotecaPublica() {
+            if (!supabaseClient) {
+                console.error('Supabase não inicializado');
+                return;
+            }
+
+            try {
+                console.log('Carregando projetos aprovados...');
+                
+                const { data, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .eq('status', 'aprovado')
+                    .order('data_criacao', { ascending: false });
+
+                if (error) {
+                    console.error('Erro ao carregar projetos:', error);
+                    throw error;
+                }
+
+                console.log(`Encontrados ${data?.length || 0} projetos aprovados`);
+                
+                bibliotecaPublica = data || [];
+                aplicarFiltros();
+                atualizarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro ao carregar biblioteca:', error);
+                
+                const grid = document.getElementById('projetosGrid');
+                grid.innerHTML = `
+                    <div class="error-message">
+                        <h3>⚠️ Erro ao carregar projetos</h3>
+                        <p>Não foi possível conectar com o banco de dados.</p>
+                        <p><small>Erro: ${error.message}</small></p>
+                        <button class="btn" onclick="carregarBibliotecaPublica()" style="margin-top: 1rem;">
+                            🔄 Tentar novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function atualizarEstatisticas() {
+            const totalElement = document.getElementById('totalProjetos');
+            if (totalElement) {
+                totalElement.textContent = `📊 ${bibliotecaPublica.length} projetos`;
+            }
+        }
+
+        // Expor funções globalmente
+        window.filtrarPor = filtrarPor;
+        window.visualizarProjeto = visualizarProjeto;
+    </script>
+</body>
+>>>>>>> d2ba42b (Primeiro commit do projeto ViewPro 3D)
 </html>
